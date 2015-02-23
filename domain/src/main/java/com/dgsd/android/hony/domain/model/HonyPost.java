@@ -4,30 +4,53 @@ import com.dgsd.hony.rest.entity.Post;
 
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
-public class HonyPost {
+import se.emilsjolander.sprinkles.Model;
+import se.emilsjolander.sprinkles.annotations.Column;
+import se.emilsjolander.sprinkles.annotations.Key;
+import se.emilsjolander.sprinkles.annotations.Table;
 
+import static com.dgsd.android.hony.domain.db.backend.DatabaseBackend.Contract;
+
+@Table(Contract.TABLE_POSTS.TABLE_NAME)
+public class HonyPost extends Model {
+
+    @Key
+    @Column(Contract.TABLE_POSTS.COL_ID)
     private String id;
 
-    private String message;
-
-    private String link;
-
+    @Column(Contract.TABLE_POSTS.COL_OBJECT_ID)
     private String objectId;
 
+    @Column(Contract.TABLE_POSTS.COL_MESSAGE)
+    private String message;
+
+    @Column(Contract.TABLE_POSTS.COL_LINK)
+    private String link;
+
+    @Column(Contract.TABLE_POSTS.COL_PHOTO_URL)
     private String photoUrl;
 
+    @Column(Contract.TABLE_POSTS.COL_CREATED)
     private Date createdTime;
 
+    @Column(Contract.TABLE_POSTS.COL_UPDATED)
     private Date updatedTime;
 
+    @Column(Contract.TABLE_POSTS.COL_SHARES)
     private int shares;
 
+    @Column(Contract.TABLE_POSTS.COL_LIKES)
     private int likes;
 
-    private int comments;
+    @Column(Contract.TABLE_POSTS.COL_COMMENTS)
+    private int totalComments;
 
-    HonyPost(Post networkPost) {
+    private List<HonyComment> comments;
+
+    public HonyPost(Post networkPost) {
         this.id = networkPost.getId();
         this.message = networkPost.getMessage();
         this.link = networkPost.getLink();
@@ -37,7 +60,15 @@ public class HonyPost {
         this.updatedTime = networkPost.getUpdatedTime();
         this.shares = networkPost.getShares();
         this.likes = networkPost.getLikes();
-        this.comments = networkPost.getCommentCount();
+        this.totalComments = networkPost.getCommentCount();
+
+        this.comments = new LinkedList<>();
+        final Post.Comments networkComments = networkPost.getComments();
+        if (networkComments != null) {
+            for (Post.Comment comment : networkComments) {
+                comments.add(new HonyComment(comment));
+            }
+        }
     }
 
     public String getId() {
@@ -76,7 +107,11 @@ public class HonyPost {
         return likes;
     }
 
-    public int getComments() {
+    public int getTotalComments() {
+        return totalComments;
+    }
+
+    public List<HonyComment> getComments() {
         return comments;
     }
 
@@ -105,7 +140,7 @@ public class HonyPost {
                 ", updatedTime=" + updatedTime +
                 ", shares=" + shares +
                 ", likes=" + likes +
-                ", comments=" + comments +
+                ", totalComments=" + totalComments +
                 '}';
     }
 }

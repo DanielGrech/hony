@@ -1,21 +1,29 @@
 package com.dgsd.android.hony.domain;
 
+import android.content.Context;
+
 import com.dgsd.android.hony.domain.db.HonyDatabaseProvider;
-import com.dgsd.android.hony.domain.model.HonyPostList;
+import com.dgsd.android.hony.domain.db.backend.SprinklesDatabaseBackend;
+import com.dgsd.android.hony.domain.model.HonyPost;
 import com.dgsd.hony.rest.HonyRestProvider;
 import com.dgsd.hony.rest.entity.GetPostsResponse;
+import com.dgsd.hony.rest.entity.Post;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import rx.Observable;
 import rx.functions.Func1;
-import rx.functions.Func2;
 
 public class HonyDataSource {
 
     private HonyRestProvider restProvider;
     private HonyDatabaseProvider dbProvider;
 
-    public HonyDataSource() {
-        this(new HonyRestProvider(), new HonyDatabaseProvider());
+    public HonyDataSource(Context context) {
+        this(new HonyRestProvider(),
+                new HonyDatabaseProvider(SprinklesDatabaseBackend.getInstance(context)));
     }
 
     HonyDataSource(HonyRestProvider restProvider, HonyDatabaseProvider dbProvider) {
@@ -27,35 +35,48 @@ public class HonyDataSource {
         this.restProvider.setAccessToken(accessToken);
     }
 
-    public Observable<HonyPostList> getPosts() {
-        final Observable<HonyPostList> restData = restProvider.getPosts()
+    public Observable<List<HonyPost>> getPosts() {
+        final Observable<List<HonyPost>> restData = restProvider.getPosts()
                 .map(new RestToDbPostListMap())
-                .map(new SaveRestDataToDbFunction())
-                .startWith(HonyPostList.EMPTY);
+                .map(new SaveRestDataToDbFunction());
 
-        final Observable<HonyPostList> dbData
-                = dbProvider.getPosts().startWith(HonyPostList.EMPTY);
+        final Observable<List<HonyPost>> dbData = dbProvider.getPosts();
 
-        return Observable.combineLatest(dbData, restData,
-                new Func2<HonyPostList, HonyPostList, HonyPostList>() {
-            @Override
-            public HonyPostList call(HonyPostList first, HonyPostList second) {
-                return first.merge(second);
-            }
-        });
+        return Observable.mergeDelayError(dbData, restData)
+                .filter(new Func1<List<HonyPost>, Boolean>() {
+                    @Override
+                    public Boolean call(List<HonyPost> honyPosts) {
+                        return honyPosts != null;
+                    }
+                })
+                .map(new Func1<List<HonyPost>, List<HonyPost>>() {
+                    @Override
+                    public List<HonyPost> call(List<HonyPost> honyPosts) {
+                        Collections.sort(honyPosts, HonyPost.SORT_BY_NEWEST_COMPARATOR);
+                        return honyPosts;
+                    }
+                })
+                .defaultIfEmpty(Collections.EMPTY_LIST);
     }
 
-    private class RestToDbPostListMap implements Func1<GetPostsResponse, HonyPostList> {
+    private class RestToDbPostListMap implements Func1<GetPostsResponse, List<HonyPost>> {
 
         @Override
-        public HonyPostList call(GetPostsResponse getPostsResponse) {
-            return new HonyPostList(getPostsResponse);
+        public List<HonyPost> call(GetPostsResponse getPostsResponse) {
+            final List<HonyPost> posts = new LinkedList<>();
+            if (getPostsResponse != null) {
+                for (Post post : getPostsResponse) {
+                    posts.add(new HonyPost(post));
+                }
+            }
+            return posts;
         }
     }
 
-    private class SaveRestDataToDbFunction implements Func1<HonyPostList, HonyPostList> {
+    private class SaveRestDataToDbFunction implements Func1<List<HonyPost>, List<HonyPost>> {
         @Override
-        public HonyPostList call(HonyPostList input) {
+        public List<HonyPost> call(List<HonyPost> input) {
+            dbProvider.save(input);
             return input;
         }
     }

@@ -3,6 +3,7 @@ package com.dgsd.hony.rest.entity;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 public class Post {
@@ -98,7 +99,7 @@ public class Post {
         }
     }
 
-    public class Comments {
+    public class Comments implements Iterable<Comment> {
 
         @SerializedName("data")
         private List<Comment> comments;
@@ -112,6 +113,23 @@ public class Post {
 
         public int getTotalCount() {
             return summary == null ? 0 : summary.getCount();
+        }
+
+        @Override
+        public Iterator<Comment> iterator() {
+            final Iterator<Comment> empty = new Iterator<Comment>() {
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public Comment next() {
+                    return null;
+                }
+            };
+
+            return comments == null ? empty : comments.iterator();
         }
     }
 
@@ -150,6 +168,10 @@ public class Post {
 
         public CommentFrom getFrom() {
             return from;
+        }
+
+        public Post getPost() {
+            return Post.this;
         }
     }
 
