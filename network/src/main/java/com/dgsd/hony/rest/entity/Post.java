@@ -76,6 +76,10 @@ public class Post {
         return likes == null ? 0 : likes.getTotalCount();
     }
 
+    public int getCommentCount() {
+        return comments == null ? 0 : comments.getTotalCount();
+    }
+
     public Comments getComments() {
         return comments;
     }
