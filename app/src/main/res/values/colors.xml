@@ -3,7 +3,7 @@
     <color name="primary">#1A1E25</color>
     <color name="primary_dark">#1A1E25</color>
     <color name="accent">#2DBDF8</color>
-    <color name="primary_text">@android:color/white</color>
-    <color name="secondary_text">#505C73</color>
+    <color name="primary_text">#505C73</color>
+    <color name="secondary_text">@android:color/white</color>
     <color name="divider">#B6B6B6</color>
 </resources>

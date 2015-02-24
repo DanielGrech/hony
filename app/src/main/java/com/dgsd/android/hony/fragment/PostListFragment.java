@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dgsd.android.hony.R;
+import com.dgsd.android.hony.adapter.PostListAdapter;
 import com.dgsd.android.hony.domain.HonyDataSource;
 import com.dgsd.android.hony.domain.model.HonyPost;
 import com.dgsd.android.hony.mvp.presenter.PostListPresenter;
@@ -31,8 +32,9 @@ public class PostListFragment extends BaseFragment implements PostListMVPView, S
     @InjectView(R.id.fullscreen_error)
     TextView fullscreenError;
 
-    private PostListPresenter presenter;
+    private PostListAdapter adapter;
 
+    private PostListPresenter presenter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,8 @@ public class PostListFragment extends BaseFragment implements PostListMVPView, S
         super.onCreateView(rootView, savedInstanceState);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(adapter = new PostListAdapter());
+
         swipeRefreshLayout.setOnRefreshListener(this);
     }
 
@@ -108,7 +112,7 @@ public class PostListFragment extends BaseFragment implements PostListMVPView, S
 
     @Override
     public void showPosts(@NonNull List<HonyPost> posts) {
-        fullscreenError.setText("Show posts: " + posts);
+        adapter.populate(posts);
     }
 
     @Override
