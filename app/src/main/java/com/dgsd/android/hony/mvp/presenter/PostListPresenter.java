@@ -22,7 +22,15 @@ public class PostListPresenter extends Presenter<PostListMVPView> {
     @Override
     public void onResume() {
         super.onResume();
+        reloadFromTop();
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    public void reloadFromTop() {
         getView().showLoading();
         subscribe(dataSource.getPosts(), new Observer<List<HonyPost>>() {
             @Override
@@ -41,10 +49,5 @@ public class PostListPresenter extends Presenter<PostListMVPView> {
                 getView().showPosts(honyPosts);
             }
         });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 }

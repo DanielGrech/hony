@@ -20,7 +20,7 @@ import java.util.List;
 
 import butterknife.InjectView;
 
-public class PostListFragment extends BaseFragment implements PostListMVPView {
+public class PostListFragment extends BaseFragment implements PostListMVPView, SwipeRefreshLayout.OnRefreshListener {
 
     @InjectView(R.id.refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
@@ -55,6 +55,7 @@ public class PostListFragment extends BaseFragment implements PostListMVPView {
         super.onCreateView(rootView, savedInstanceState);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        swipeRefreshLayout.setOnRefreshListener(this);
     }
 
     @Override
@@ -113,5 +114,10 @@ public class PostListFragment extends BaseFragment implements PostListMVPView {
     @Override
     public Context getContext() {
         return getActivity();
+    }
+
+    @Override
+    public void onRefresh() {
+        presenter.reloadFromTop();
     }
 }
