@@ -30,7 +30,7 @@ public class HonyRestProvider {
     private String accessToken;
 
     public HonyRestProvider() {
-        this(Logging.OFF);
+        this(Logging.ON);
     }
 
     public HonyRestProvider(Logging logging) {

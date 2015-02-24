@@ -36,10 +36,14 @@ public class HonyComment extends Model {
     @Column(Contract.TABLE_COMMENTS.COL_FROM_ID)
     private String fromId;
 
-    HonyComment(Post.Comment comment) {
+    public HonyComment() {
+
+    }
+
+    HonyComment(Post.Comment comment, String postId) {
         this.id = comment.getId();
-        this.postId = comment.getPost().getId();
         this.message = comment.getMessage();
+        this.postId = postId;
         this.likes = comment.getLikeCount();
         this.createdTime = comment.getCreatedTime();
         if (comment.getFrom() != null) {

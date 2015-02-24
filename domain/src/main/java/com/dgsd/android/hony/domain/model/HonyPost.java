@@ -50,6 +50,10 @@ public class HonyPost extends Model {
 
     private List<HonyComment> comments;
 
+    public HonyPost() {
+
+    }
+
     public HonyPost(Post networkPost) {
         this.id = networkPost.getId();
         this.message = networkPost.getMessage();
@@ -66,7 +70,7 @@ public class HonyPost extends Model {
         final Post.Comments networkComments = networkPost.getComments();
         if (networkComments != null) {
             for (Post.Comment comment : networkComments) {
-                comments.add(new HonyComment(comment));
+                comments.add(new HonyComment(comment, this.id));
             }
         }
     }
@@ -132,15 +136,8 @@ public class HonyPost extends Model {
     public String toString() {
         return "HonyPost{" +
                 "id='" + id + '\'' +
-                ", message='" + message + '\'' +
-                ", link='" + link + '\'' +
                 ", objectId='" + objectId + '\'' +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", createdTime=" + createdTime +
-                ", updatedTime=" + updatedTime +
-                ", shares=" + shares +
-                ", likes=" + likes +
-                ", totalComments=" + totalComments +
+                ", message='" + message +
                 '}';
     }
 }

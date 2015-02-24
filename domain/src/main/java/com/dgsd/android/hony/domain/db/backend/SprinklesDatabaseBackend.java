@@ -13,6 +13,7 @@ import se.emilsjolander.sprinkles.ModelList;
 import se.emilsjolander.sprinkles.Query;
 import se.emilsjolander.sprinkles.Sprinkles;
 import se.emilsjolander.sprinkles.Transaction;
+import timber.log.Timber;
 
 import static com.dgsd.android.hony.domain.db.backend.DatabaseBackend.Contract.TABLE_COMMENTS;
 import static com.dgsd.android.hony.domain.db.backend.DatabaseBackend.Contract.TABLE_POSTS;
@@ -41,7 +42,7 @@ public class SprinklesDatabaseBackend implements DatabaseBackend {
             final Transaction transaction = new Transaction();
             try {
                 if (!new ModelList<>(postList).saveAll(transaction)) {
-                    // TODO: Log warning!
+                    Timber.w("Could not save post list to db!");
                     return;
                 }
 
@@ -54,7 +55,7 @@ public class SprinklesDatabaseBackend implements DatabaseBackend {
                 }
 
                 if (!commentsToSave.saveAll(transaction)) {
-                    // TODO: Log warning!
+                    Timber.w("Could not save comments to db!");
                     return;
                 }
 
@@ -81,7 +82,7 @@ public class SprinklesDatabaseBackend implements DatabaseBackend {
 
         @Override
         protected void doMigration(SQLiteDatabase db) {
-            db.execSQL("CREATE OR REPLACE TABLE " + TABLE_POSTS.TABLE_NAME + " ( " +
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_POSTS.TABLE_NAME + " ( " +
                     TABLE_POSTS.COL_ID + " TEXT PRIMARY KEY," +
                     TABLE_POSTS.COL_OBJECT_ID + " TEXT," +
                     TABLE_POSTS.COL_MESSAGE + " TEXT," +
@@ -94,14 +95,14 @@ public class SprinklesDatabaseBackend implements DatabaseBackend {
                     TABLE_POSTS.COL_COMMENTS + " INTEGER" +
                     ")");
 
-            db.execSQL("CREATE OR REPLACE TABLE " + TABLE_COMMENTS.TABLE_NAME + " ( " +
-                    TABLE_COMMENTS.COL_ID + " TEXT PRIMARY KEY" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_COMMENTS.TABLE_NAME + " ( " +
+                    TABLE_COMMENTS.COL_ID + " TEXT PRIMARY KEY," +
                     TABLE_COMMENTS.COL_POST_ID + " TEXT," +
                     TABLE_COMMENTS.COL_MESSAGE + " TEXT," +
                     TABLE_COMMENTS.COL_LIKES + " INTEGER," +
                     TABLE_COMMENTS.COL_CREATED + " INTEGER," +
                     TABLE_COMMENTS.COL_FROM_NAME + " TEXT," +
-                    TABLE_COMMENTS.COL_FROM_ID + " TEXT" +
+                    TABLE_COMMENTS.COL_FROM_ID + " TEXT," +
                     "FOREIGN KEY(" + TABLE_COMMENTS.COL_POST_ID + ") " +
                     "REFERENCES " + TABLE_POSTS.TABLE_NAME + "(" + TABLE_POSTS.COL_ID + ") " +
                     "ON DELETE CASCADE" +

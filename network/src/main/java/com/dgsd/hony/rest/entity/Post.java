@@ -169,10 +169,6 @@ public class Post {
         public CommentFrom getFrom() {
             return from;
         }
-
-        public Post getPost() {
-            return Post.this;
-        }
     }
 
     public class CommentFrom {
